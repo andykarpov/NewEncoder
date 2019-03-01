@@ -57,9 +57,9 @@ const encoderStateTransition NewEncoder::halfPulseTransitionTable[] = {
 isrInfo NewEncoder::_isrTable[CORE_NUM_INTERRUPT];
 
 NewEncoder::NewEncoder(uint8_t aPin, uint8_t bPin, int16_t minValue,
-		int16_t maxValue, int16_t initalValue, uint8_t type) {
+		int16_t maxValue, int16_t initalValue, uint8_t type, int16_t increment) {
 	active = false;
-	configure(aPin, bPin, minValue, maxValue, initalValue, type);
+	configure(aPin, bPin, minValue, maxValue, initalValue, type, increment);
 }
 
 NewEncoder::NewEncoder() {
@@ -86,7 +86,7 @@ void NewEncoder::end() {
 }
 
 void NewEncoder::configure(uint8_t aPin, uint8_t bPin, int16_t minValue,
-		int16_t maxValue, int16_t initalValue, uint8_t type) {
+		int16_t maxValue, int16_t initalValue, uint8_t type, int16_t increment) {
 
 	if (active) {
 		end();
@@ -95,6 +95,7 @@ void NewEncoder::configure(uint8_t aPin, uint8_t bPin, int16_t minValue,
 	_bPin = bPin;
 	_minValue = minValue;
 	_maxValue = maxValue;
+	_increment = increment;
 	_aPin_register = PIN_TO_BASEREG(aPin);
 	_bPin_register = PIN_TO_BASEREG(bPin);
 	_aPin_bitmask = PIN_TO_BITMASK(aPin);
@@ -278,14 +279,16 @@ void NewEncoder::pinChangeHandler(uint8_t index) {
 	if ((newState & DELTA_MASK) == INCREMENT_DELTA) {
 		clickUp = true;
 		clickDown = false;
-		if (_currentValue < _maxValue) {
-			_currentValue++;
+		_currentValue += _increment;
+		if (_currentValue > _maxValue) {
+			_currentValue = _maxValue;
 		}
 	} else if ((newState & DELTA_MASK) == DECREMENT_DELTA) {
 		clickUp = false;
 		clickDown = true;
-		if (_currentValue > _minValue) {
-			_currentValue--;
+		_currentValue -= _increment;
+		if (_currentValue < _minValue) {
+			_currentValue = _minValue;
 		}
 	}
 }

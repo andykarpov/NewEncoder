@@ -5,8 +5,8 @@
 #define NEWENCODER_H_
 
 #include <Arduino.h>
-#include "utility\interrupt_pins.h"
-#include "utility\direct_pin_read.h"
+#include "utility/interrupt_pins.h"
+#include "utility/direct_pin_read.h"
 
 #define FULL_PULSE 0
 #define HALF_PULSE 1
@@ -25,12 +25,12 @@ typedef uint8_t encoderStateTransition[4];
 class NewEncoder {
 public:
 	NewEncoder(uint8_t aPin, uint8_t bPin, int16_t minValue, int16_t maxValue, int16_t initalValue, uint8_t type =
-			FULL_PULSE);
+			FULL_PULSE, int16_t increment = 1);
 	NewEncoder();
 	~NewEncoder();
 	bool begin();
 	void configure(uint8_t aPin, uint8_t bPin, int16_t minValue, int16_t maxValue, int16_t initalValue, uint8_t type =
-			FULL_PULSE);
+			FULL_PULSE, int16_t increment = 1);
 	void end();
 	bool enabled();
 	int16_t setValue(int16_t);
@@ -60,6 +60,7 @@ private:
 	volatile IO_REG_TYPE _bPin_bitmask;
 	volatile bool clickUp = false;
 	volatile bool clickDown = false;
+	volatile int16_t _increment = 1;
 
 	static const encoderStateTransition fullPulseTransitionTable[];
 	static const encoderStateTransition halfPulseTransitionTable[];
